@@ -1,0 +1,17 @@
+.menu {
+  position: absolute;
+  float: left;
+  width: 150px;
+  background-color: black;
+  height: 100%;
+}
+.menu ul li {
+  list-style-type: none;
+}
+.myPage {
+  margin-left: 160px;
+}
+.myTable{
+  table-layout: fixed;
+  width: 600px; 
+}
