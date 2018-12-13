@@ -1,17 +1,33 @@
 .menu {
-  position: absolute;
-  float: left;
-  width: 150px;
+  
   background-color: black;
-  height: 100%;
+
+  height:100%;
+  width:10%;
+  float:left;
+  
 }
 .menu ul li {
   list-style-type: none;
 }
 .myPage {
-  margin-left: 160px;
+  
+  height:100%;
+  width:90%;
+  float:left;
 }
 .myTable{
   table-layout: fixed;
   width: 600px; 
+}
+.left{
+  height:100%;
+  width:15%;
+  float:left;
+  overflow:hidden;
+}
+.Right{
+  height:100%;
+  width:85%;
+  float:left;
 }
