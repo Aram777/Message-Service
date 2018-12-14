@@ -19,7 +19,7 @@ class App extends Component {
               <NavLink to="/home" exact>Home</NavLink>
             </li>
             <li>
-              <NavLink to="/lstCustomers">Customers</NavLink>
+              <NavLink to="/lstCustomers" exact>Customers</NavLink>
             </li>
             <li>
               <NavLink to="/lstMessages">Messages</NavLink>
@@ -31,6 +31,7 @@ class App extends Component {
           <Route path="/home" exact component={Home} />
           <Route path="/lstCustomers" exact component={Customers} />
           <Route path="/lstMessages" exact component={Messages} />
+          <Customers/>
         </div>
       </div>
     );

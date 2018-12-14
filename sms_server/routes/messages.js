@@ -2,34 +2,38 @@ var express = require('express');
 var router = express.Router();
 var messagesdb = require('../models/messagesdb');
 var nodemailer = require('nodemailer');
-function sendmai(){
-        var transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: 'tikkomaria@gmail.com',
-            pass: '!1asdfgh'
-          }
-        });
-        
-        var mailOptions = {
-          from: 'tikkomaria@gmail.com',
-          to: 'aramabbasi@yahoo.com',
-          subject: 'Sending Email using Node.js',
-          text: 'That was easy!'
-        };
-        
-        transporter.sendMail(mailOptions, function(error, info){
-          if (error) {
+function sendmai() {
+    var transporter = nodemailer.createTransport({
+        service: 'oamk.fi',
+        auth: {
+            user: 't7abar00@student.oamk.fi',
+            pass: '2OamkAmitis'
+        }
+    });
+
+    var mailOptions = {
+        from: 't7abar00@student.oamk.fi',
+        to: 'aramabbasi@yahoo.com',
+        subject: 'Sending Email using Node.js',
+        text: 'That was easy!'
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
             console.log(error);
-          } else {
+        } else {
             console.log('Email sent: ' + info.response);
-          }
-        });
-    }
+        }
+    });
+}
+router.get('/msgg/', function (req, res, next) {
+    
+    sendmai();
+});
 router.get('/', function (req, res, next) {
     req.session.myuser['userid'] = 110
 
-    sendmai();
+
 
 
 
@@ -42,9 +46,10 @@ router.get('/', function (req, res, next) {
     });
 
 });
-router.get('/msgs/:idcustomers?', function (req, res, next) {
-    if (req.session.myuser['userid'] == 110) {
-        customersdb.getAllcustomers(function (err, rows) {
+router.get('/msgs/:idmessages?', function (req, res, next) {
+    
+    if (req.params.idmessages) {
+        messagesdb.getCustomerMsg(req.params.idmessages, function (err, rows) {
             if (err) {
                 res.json(err);
             } else {
@@ -52,10 +57,12 @@ router.get('/msgs/:idcustomers?', function (req, res, next) {
             }
         });
 
-
     }
-    if (req.params.idcustomers) {
-        customersdb.getcustomerMsg(req.params.idcustomers, function (err, rows) {
+});
+router.get('/newmsgs/:idmessages?', function (req, res, next) {
+    
+    if (req.params.idmessages) {
+        messagesdb.getNewCustomerMsg(req.params.idmessages, function (err, rows) {
             if (err) {
                 res.json(err);
             } else {
@@ -70,6 +77,16 @@ router.get('/msgs/:idcustomers?', function (req, res, next) {
 //   });
 router.post('/', function (req, res, next) {
     messagesdb.addMessage(req.body, function (err, count) {
+        if (err) {
+            res.json(err);
+        } else {
+            res.json(req.body); //or return count for 1 & 0
+        }
+    });
+});
+router.post('/msg/:msgid/cus/:cusid', function (req, res, next) {
+
+    messagesdb.addMessageCust(req.params.msgid, req.params.cusid, req.body, function (err, count) {
         if (err) {
             res.json(err);
         } else {

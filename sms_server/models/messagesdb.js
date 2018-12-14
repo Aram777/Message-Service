@@ -17,15 +17,20 @@ var messages = {
             , callback);
     },
 
-    // getcustomerMsg: function (idcustomers, callback) {
-    //     return db.query('Select msg.msgsubject, msg.createdate, ' +
-    //         'case snt.status ' +
-    //         'when 0 then \'Sent\' ' +
-    //         'when 1 then \'Answered\' ' +
-    //         'end as statusdesc ' +
-    //         'from messages msg inner join sendmessage snt on msg.idmessages=snt.idmessages ' +
-    //         'where snt.idcustomers=?', [idcustomers], callback);
-    // },
+    getNewCustomerMsg: function (idmessages, callback) {
+        return db.query('select ' +idmessages+' as msgID, cust.idcustomers as id, cust.first_name, cust.last_name ' +
+            'from  customers cust where cust.idcustomers not in ' +
+            '(select sntmsg.idcustomers from sendmessage sntmsg where sntmsg.idmessages=?); ', [idmessages], callback);
+    },
+
+   
+
+    getCustomerMsg: function (idmessages, callback) {
+        return db.query('SELECT sntmsg.idmessages, cust.first_name, cust.last_name, ' +
+            'sntmsg.createdate, sntmsg.idcustomers ' +
+            'from sendmessage sntmsg inner join customers cust on cust.idcustomers= sntmsg.idcustomers ' +
+            'where sntmsg.idmessages=?;', [idmessages], callback);
+    },
     addMessage: function (messages, callback) {
         return db.query(
             'insert into messages (message_text, byemail,bysms,status,createdate, msgsubject)    values(?,?,?,?,?,?)',
@@ -35,6 +40,18 @@ var messages = {
             messages.status,
             messages.createdate,
             messages.msgsubject],
+            callback
+        );
+    },
+
+    addMessageCust: function (idmessages, idcustomers, messages, callback) {
+        return db.query(
+            'insert into sendmessage (idcustomers, idmessages,createdate,status)    values(?,?,?,?) ',
+            [idcustomers,
+                idmessages,
+            new Date(),
+            0
+            ],
             callback
         );
     },
@@ -48,12 +65,14 @@ var messages = {
             'message_text=?,' +
             'byemail=?,' +
             'bysms=?,' +
-            'status=0,'+
-            'msgsubject=?',
+            'msgsubject=?,'+
+            'status=? '+
+            ' where idmessages=?',
             [messages.message_text,
             messages.byemail,
             messages.bysms,
             messages.msgsubject,
+            messages.status,
                 idmessages
             ],
             callback

@@ -15,9 +15,9 @@ const ProgressBarFormatter = ({ value }) => {
 const columns = [
     {
         key: "idcustomers",
-        name: "Customer ID",
+        name: "ID",
         frozen: true,
-        width: 120
+        width: 70
     },
     {
         key: "name_prefix",
@@ -49,13 +49,13 @@ const columns = [
     },
     {
         key: "emaildesc",
-        name: "Send Email",
-        width: 100
+        name: "by Email",
+        width: 80
     },
     {
         key: "smsdesc",
-        name: "Send SMS",
-        width: 100
+        name: "by SMS",
+        width: 80
     },
     {
         key: "cntallmsg",
@@ -120,6 +120,7 @@ class Customers extends Component {
 
 
 
+
     }
     handleSaveClick() {
         const User = {
@@ -138,17 +139,19 @@ class Customers extends Component {
             axios
                 .post('http://localhost:3000/customers', User)
                 .then(res => {
+                    this.getCustomers();
                 });
 
-            this.getCustomers();
+            
         }
         if (this.frmStatus == 2) {
 
             axios
                 .put('http://localhost:3000/customers/' + this.myDividcustomers.value, User)
                 .then(res => {
+                    this.getCustomers();
                 });
-                this.getCustomers();
+                
 
         }
 
@@ -267,12 +270,13 @@ class Customers extends Component {
     }
     getCustomers() {
         axios.get(`http://localhost:3000/customers`).then(res => {
-            const lstCustomers = res.data;
-            this.setState({ lstCustomers });
+            const _lstCustomers = res.data;
+            
+            this.setState({lstCustomers: _lstCustomers });
             this.rowselect(0);
+            this.CreateGrid();
         });
 
-        this.CreateGrid();
 
     }
     rowselect(iRowIdx) {
@@ -307,9 +311,10 @@ class Customers extends Component {
 
     }
     CreateGrid() {
+        
         return (
             <div>
-                <ReactDataGrid ref={c => this.myDivGrid = c}
+                <ReactDataGrid 
                     columns={columns}
                     rowGetter={i => this.state.lstCustomers[i]}
                     rowsCount={this.state.lstCustomers.length}

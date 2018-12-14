@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import ReactDataGrid from "react-data-grid";
 import { ProgressBar } from "react-bootstrap";
 import Button from 'react-bootstrap/lib/Button';
-
+import CustomerMsg from './CustomerMsg';
 
 import faker from "faker";
 import axios from 'axios';
@@ -54,27 +54,55 @@ const columns = [
 
 const columnsdet = [
     {
-        key: "msgsubject",
-        name: "Subject",
+        key: "idcustomers",
+        name: "ID",
         frozen: true,
-        width: 250
+        width: 70
     },
     {
-        key: "statusdesc",
-        name: "Status",
+        key: "first_name",
+        name: "First Name",
         frozen: true,
-        width: 150
+        width: 170
+    },
+    {
+        key: "last_name",
+        name: "Last Name",
+        frozen: true,
+        width: 170
     }
 ];
-
+const columnsdetnew = [
+    {
+        key: "id",
+        name: "ID",
+        frozen: true,
+        width: 70
+    },
+    {
+        key: "first_name",
+        name: "First Name",
+        frozen: true,
+        width: 170
+    },
+    {
+        key: "last_name",
+        name: "Last Name",
+        frozen: true,
+        width: 170
+    }
+];
 
 class Messages extends Component {
     constructor() {
         super();
-
+        this.addStatus = false;
+        this.msg_id = 0;
+        this.custForMsg = [];
         this.getMessages = this.getMessages.bind(this);
         this.rowselect = this.rowselect.bind(this);
-        this.addMessage = this.addMessage.bind(this);
+        this.handleSendMsgClick=this.handleSendMsgClick.bind(this);
+        //this.addMessage = this.addMessage.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleAddClick = this.handleAddClick.bind(this);
         this.handleEditClick = this.handleEditClick.bind(this);
@@ -82,9 +110,11 @@ class Messages extends Component {
         this.handleCancelClick = this.handleCancelClick.bind(this);
         this.CreateGrid = this.CreateGrid.bind(this);
         this.CreateChildGrid = this.CreateChildGrid.bind(this);
-
+        this.handleAddCustomerClick = this.handleAddCustomerClick.bind(this);
         this.showButt = this.showButt.bind(this);
 
+        this.newCustomer = [];
+        this.selectedIndexes = [];
         this.frmStatus = 0;
         this.selected_row = 0;
         this.state = {
@@ -92,10 +122,45 @@ class Messages extends Component {
         };
         this.getMessages();
 
+        this.CreateNewCustomerGrid = this.CreateNewCustomerGrid.bind(this);
 
 
 
     }
+
+    handleAddCustomerClick() {
+        if (this.addStatus) {
+            this.myDivRight.style.visibility = "hidden";
+            this.CreateChildGrid()
+            this.btnAddCustomer.innerHTML = "Add Customer";
+        }
+        else {
+            this.myDivRight.style.visibility = "visible";
+            this.CreateNewCustomerGrid(1);
+            this.btnAddCustomer.innerHTML = "Hide";
+
+        }
+        this.addStatus = !this.addStatus;
+        //
+    }
+    handleSendMsgClick(){
+        const Message = {
+            msgsubject: this.myDivmsgsubject.value,
+            message_text: this.myDivmessage_text.value,
+            byemail: this.myDivbyemail.checked,
+            bysms: this.myDivbysms.checked,
+            createdate: new Date(),
+            status: 1   
+        }
+       
+        axios
+        .put('http://localhost:3000/messages/' + this.myDividmessages.value, Message)
+        .then(res => {
+            this.getMessages();
+        });
+
+    }
+
     handleSaveClick() {
         const Message = {
             msgsubject: this.myDivmsgsubject.value,
@@ -111,17 +176,17 @@ class Messages extends Component {
             axios
                 .post('http://localhost:3000/messages', Message)
                 .then(res => {
+                    this.getMessages();
                 });
 
-            this.getMessages();
         }
         if (this.frmStatus == 2) {
 
             axios
                 .put('http://localhost:3000/messages/' + this.myDividmessages.value, Message)
                 .then(res => {
+                    this.getMessages();
                 });
-                this.getMessages();
 
         }
 
@@ -137,12 +202,21 @@ class Messages extends Component {
                 this.btnEdit.style.visibility = "visible";
                 this.btnSave.style.visibility = "hidden";
                 this.btnCancel.style.visibility = "hidden";
+                this.btnAddCustomer.style.visibility = "visible";
+                this.btnSendMessage.style.visibility = "visible";
                 this.myDivmsgsubject.disabled = true;
                 this.myDivmessage_text.disabled = true;
                 this.myDivbyemail.disabled = true;
                 this.myDivbysms.disabled = true;
+                if (this.myDivstatus.value == 1) {
+                    this.btnEdit.style.visibility = "hidden";
+                    this.btnAddCustomer.style.visibility = "hidden";
+                    this.btnSendMessage.style.visibility = "hidden";
+                }
+                this.myDivBaseGrid.disabled = false;
                 break;
             case 1:
+                this.myDivBaseGrid.disabled = true;
                 this.btnAdd.style.visibility = "hidden";
                 this.btnEdit.style.visibility = "hidden";
                 this.btnSave.style.visibility = "visible";
@@ -167,6 +241,7 @@ class Messages extends Component {
 
                 break;
             case 2:
+                this.myDivBaseGrid.disabled = true;
                 this.btnAdd.style.visibility = "hidden";
                 this.btnEdit.style.visibility = "hidden";
                 this.btnSave.style.visibility = "visible";
@@ -185,9 +260,6 @@ class Messages extends Component {
 
     }
     handleAddClick() {
-
-        
-
 
         this.frmStatus = 1;
         this.showButt();
@@ -211,33 +283,11 @@ class Messages extends Component {
 
 
     }
-    addMessage() {
 
-        const User = {
-            first_name: faker.name.firstName(),
-            last_name: faker.name.lastName(),
-            name_prefix: faker.name.prefix(),
-            email: faker.internet.email(),
-            phone_default: "0401234567",
-            emailallowed: 0,
-            smsallowed: 0,
-            createdate: new Date()
-        }
-
-
-        axios
-            .post('http://localhost:3000/messages', User)
-            .then(res => {
-                // console.log(res);
-                // console.log(res.data);
-                // 
-
-            });
-    }
     getMessages() {
         axios.get(`http://localhost:3000/messages`).then(res => {
-            const lstMessages = res.data;
-            this.setState({ lstMessages });
+            const _lstMessages = res.data;
+            this.setState({ lstMessages: _lstMessages });
             this.rowselect(0);
         });
 
@@ -252,27 +302,51 @@ class Messages extends Component {
             if (this.state.lstMessages.length > 0) {
                 this.selected_row = iRowIdx;
                 let cust = this.state.lstMessages[iRowIdx];
+                this.msg_id = cust["idmessages"];
                 this.myDividmessages.value = cust["idmessages"];
                 this.myDivmsgsubject.value = cust["msgsubject"];
                 this.myDivmessage_text.value = cust["message_text"];
                 this.myDivbyemail.checked = cust["byemail"];
                 this.myDivbysms.checked = cust["bysms"];
+                this.myDivstatus.value = cust["status"];
+                this.showButt();
+                this.myMsgUserTitle.value = 'Resulat for ' + cust["msgsubject"];
 
-                // this.myMsgUserTitle.value = 'Registered message for ' + cust["first_name"] + '  ' + cust["last_name"];
-                // let url = 'http://localhost:3000/customers/msgs/' + cust["idcustomers"];
-                // axios.get(url).then(res => {
-                //     const _lstMsg = res.data;
-                //     this.setState({ lstMsg: _lstMsg });
 
-                // });
+                let url = 'http://localhost:3000/messages/newmsgs/' + cust["idmessages"];
+                axios.get(url).then(res => {
+                     this.custForMsg = res.data;
 
+
+                });
+                 url = 'http://localhost:3000/messages/msgs/' + cust["idmessages"];
+                axios.get(url).then(res => {
+                    const _lstMsg = res.data;
+                    this.setState({ lstMsg: _lstMsg });
+
+                });
             }
         }
 
     }
+
+    CreateNewCustomerGrid(idChk) {
+
+
+        if (this.msg_id > 0) {
+
+
+
+            return (<CustomerMsg Msg_id={this.custForMsg} />);
+        }
+        else
+            return (<p></p>);
+    }
+
     CreateGrid() {
         return (
             <div>
+
                 <ReactDataGrid ref={c => this.myDivGrid = c}
                     columns={columns}
                     rowGetter={i => this.state.lstMessages[i]}
@@ -281,12 +355,15 @@ class Messages extends Component {
 
 
                 />
+
+
             </div>
         );
     }
     CreateChildGrid() {
+
         return (
-            <div>
+            <div ref={c => this.myDivBaseGrid = c}>
                 <ReactDataGrid
                     columns={columnsdet}
                     rowGetter={i => this.state.lstMsg[i]}
@@ -345,25 +422,41 @@ class Messages extends Component {
                                 <td height="100">
                                     <textarea name="message_text" ref={c => this.myDivmessage_text = c} style={{ height: 100, width: 250, borderColor: 'gray', borderWidth: 1 }} disabled />
                                 </td>
+                                <td></td>
+                                <td>
+                                    <button className="Mybutton Mybutton4" onClick={this.handleAddCustomerClick} ref={c => this.btnAddCustomer = c} style={{ visibility: 'visible' }}>Add Customer</button><br />
+                                    <button className="Mybutton Mybutton4" onClick={this.handleSendMsgClick} ref={c => this.btnSendMessage = c} style={{ visibility: 'visible' }}>Send Message</button>
+                                    <input type="number" name="status" ref={c => this.myDivstatus = c} style={{ width: 100, borderColor: 'gray', borderWidth: 1, visibility: 'hidden' }} disabled />
+
+                                </td>
                             </tr>
 
 
                         </tbody>
                     </table>
                 </div>
-                <div className="Mid_" ref={c => this.myDivMid = c}>
-                    <this.CreateGrid />
+                <div className="Left_">
+                    <div className="Mid_" ref={c => this.myDivMid = c}>
 
+                        <this.CreateGrid />
+
+                    </div>
+
+                    <div className="Bot_">
+                        <h3 >
+                            <input type="Text" ref={c => this.myMsgUserTitle = c} style={{ width: 600, borderColor: 'gray', borderWidth: 1 }} disabled />
+
+                        </h3>
+
+                        <this.CreateChildGrid />
+
+                    </div>
                 </div>
-                <div className="Bot_">
-                    <h3 >
-                        <input type="Text" ref={c => this.myMsgUserTitle = c} style={{ width: 600, borderColor: 'gray', borderWidth: 1 }} disabled />
 
-                    </h3>
-
-                    <this.CreateChildGrid />
-
+                <div className="right_" ref={c => this.myDivRight = c} style={{ visibility: "hidden" }} >
+                    <this.CreateNewCustomerGrid />
                 </div>
+
             </div>
         );
     }

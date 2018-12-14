@@ -3,28 +3,40 @@ var router = express.Router();
 var customersdb = require('../models/customersdb');
 
 
-router.get('/:idcustomers?', function (req, res, next) {
-    req.session.myuser['userid']=110
-    if (req.params.idcustomers) {
-        customersdb.getcustomerByid(req.params.idcustomers, function (err, rows) {
-            if (err) {
-                res.json(err);
-            } else {
-                res.json(rows);
-            }
-        });
-    } else {
-        customersdb.getAllcustomers(function (err, rows) {
-            if (err) {
-                res.json(err);
-            } else {
-                res.json(rows);
-            }
-        });
-    }
+// router.get('/:idcustomers?', function (req, res, next) {
+//     req.session.myuser['userid']=110
+//     if (req.params.idcustomers) {
+//         customersdb.getcustomerByid(req.params.idcustomers, function (err, rows) {
+//             if (err) {
+//                 res.json(err);
+//             } else {
+//                 res.json(rows);
+//             }
+//         });
+//     } else {
+//         customersdb.getAllcustomers(function (err, rows) {
+//             if (err) {
+//                 res.json(err);
+//             } else {
+//                 res.json(rows);
+//             }
+//         });
+//     }
+// });
+router.get('/', function (req, res, next) {
+
+    customersdb.getAllcustomers(function (err, rows) {
+        console.log(rows.length);
+        if (err) {
+            res.json(err);
+        } else {
+            res.json(rows);
+        }
+    });
+
 });
 router.get('/msgs/:idcustomers?', function (req, res, next) {
-    if (req.session.myuser['userid']==110){
+    if (req.session.myuser['userid'] == 110) {
         customersdb.getAllcustomers(function (err, rows) {
             if (err) {
                 res.json(err);
@@ -43,7 +55,7 @@ router.get('/msgs/:idcustomers?', function (req, res, next) {
                 res.json(rows);
             }
         });
-    
+
     }
 });
 // router.get('/users/:userId/books/:bookId', function (req, res) {
